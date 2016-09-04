@@ -10,7 +10,7 @@ RSpec.describe 'Batch' do
 
   load File.expand_path(File.join(File.dirname(__FILE__), '../../../lib/rspec/sidekiq/batch.rb'))
 
-  describe 'NullStatus' do
+  describe 'NullStatus', stub_batches: true do
     describe '#total' do
       it 'returns 0 when no jobs' do
         null_status = Sidekiq::Batch.new.status

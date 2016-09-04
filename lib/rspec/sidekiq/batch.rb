@@ -61,7 +61,7 @@ if defined? Sidekiq::Batch
 
   RSpec.configure do |config|
     config.before(:each) do |example|
-      next if example.metadata[:stub_batches] == false
+      next unless example.metadata[:stub_batches]
 
       if mocked_with_mocha?
         Sidekiq::Batch.stubs(:new) { RSpec::Sidekiq::NullBatch.new }
