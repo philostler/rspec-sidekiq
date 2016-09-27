@@ -1,3 +1,7 @@
+2.2.1
+---
+* Backport Fix clash with rspec-rails
+
 2.2.0
 ---
 * Fix typo in README file [bradhaydon#87]

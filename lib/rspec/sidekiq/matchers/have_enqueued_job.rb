@@ -4,6 +4,10 @@ module RSpec
       def have_enqueued_job(*expected_arguments)
         HaveEnqueuedJob.new expected_arguments
       end
+      if Gem::Dependency.new('rspec-rails', '>= 3.4.0').matching_specs.max_by(&:version)
+        warn "[DEPRECATION] `have_enqueued_job` is deprecated.  Please use `have_enqueued_sidekiq_job` instead."
+        alias have_enqueued_sidekiq_job have_enqueued_job
+      end
 
       class HaveEnqueuedJob
         attr_reader :klass, :expected_arguments, :actual
@@ -36,11 +40,11 @@ module RSpec
         def unwrapped_job_arguments(jobs)
           if jobs.is_a? Hash
             jobs.values.flatten.map do |job|
-              map_arguments(job).flatten
+              map_arguments(job)
             end
           else
             map_arguments(jobs)
-          end
+          end.map { |job| job.flatten }
         end
 
         def map_arguments(job)
@@ -68,6 +72,8 @@ module RSpec
             args.each_with_object({}) do |(key, value), hash|
               hash[key.to_s] = normalize_arguments(value)
             end
+          elsif args.is_a?(Symbol)
+            args.to_s
           else
             args
           end

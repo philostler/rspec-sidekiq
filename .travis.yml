@@ -6,6 +6,8 @@ rvm:
   - jruby
   - rbx-2
 script: "bundle exec rspec spec"
+before_install:
+  - gem install bundler
 matrix:
   allow_failures:
     - rvm: rbx-2
