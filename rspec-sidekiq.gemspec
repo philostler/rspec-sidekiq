@@ -17,9 +17,14 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec', '~> 3.0'
   s.add_development_dependency 'coveralls', '~> 0.8', '>= 0.8.0'
   s.add_development_dependency 'fuubar', '~> 2.0', '>= 2.0.0'
-  s.add_development_dependency 'activejob', '~> 4.2', '>= 4.0.0'
-  s.add_development_dependency 'actionmailer', '~> 4.2', '>= 4.0.0'
 
+  if RUBY_VERSION >= "2.3.0"
+    s.add_development_dependency 'activejob', '~> 5.0', '>= 5.0.0'
+    s.add_development_dependency 'actionmailer', '~> 5.0', '>= 5.0.0'
+  else
+    s.add_development_dependency 'activejob', '~> 4.2', '>= 4.0.0'
+    s.add_development_dependency 'actionmailer', '~> 4.2', '>= 4.0.0'
+  end
 
   s.files = Dir['.gitattributes'] +
             Dir['.gitignore'] +
