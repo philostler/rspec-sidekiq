@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 RSpec.describe RSpec::Sidekiq::Matchers::HaveEnqueuedJob do
@@ -6,7 +8,7 @@ RSpec.describe RSpec::Sidekiq::Matchers::HaveEnqueuedJob do
   let(:argument_subject) { RSpec::Sidekiq::Matchers::HaveEnqueuedJob.new worker_args }
   let(:matcher_subject) { RSpec::Sidekiq::Matchers::HaveEnqueuedJob.new [be_a(String), be_a(Fixnum), true, be_a(Hash)] }
   let(:worker) { create_worker }
-  let(:worker_args) { ['string', 1, true, { key: 'value', bar: :foo, nested: [{hash: true}] }] }
+  let(:worker_args) { ['string', 1, true, { key: 'value', bar: :foo, nested: [{ hash: true }] }] }
   let(:active_job) { create_active_job :mailers }
   let(:resource) { TestResource.new }
 
@@ -49,6 +51,18 @@ RSpec.describe RSpec::Sidekiq::Matchers::HaveEnqueuedJob do
 
         it 'matches on an scheduled job with #perform_at' do
           expect(worker).to have_enqueued_sidekiq_job(*worker_args_at).at(tomorrow)
+        end
+      end
+
+      context 'setting queue at enqueue time' do
+        before(:each) do
+          worker.set(queue: queue).perform_async *worker_args
+        end
+
+        let(:queue) { :queue }
+
+        it 'matches on an scheduled job' do
+          expect(worker).to have_enqueued_sidekiq_job(*worker_args).to(queue)
         end
       end
     end
@@ -106,7 +120,7 @@ RSpec.describe RSpec::Sidekiq::Matchers::HaveEnqueuedJob do
   describe '#description' do
     it 'returns description' do
       argument_subject.matches? worker
-      expect(argument_subject.description).to eq %{have an enqueued #{worker} job with arguments [\"string\", 1, true, {\"key\"=>\"value\", \"bar\"=>\"foo\", \"nested\"=>[{\"hash\"=>true}]}]}
+      expect(argument_subject.description).to eq %(have an enqueued #{worker} job with arguments [\"string\", 1, true, {\"key\"=>\"value\", \"bar\"=>\"foo\", \"nested\"=>[{\"hash\"=>true}]}])
     end
   end
 
@@ -137,14 +151,14 @@ RSpec.describe RSpec::Sidekiq::Matchers::HaveEnqueuedJob do
       context 'when expected are arguments' do
         it 'returns true' do
           worker.perform_async *worker_args
-          expect(argument_subject.matches? worker).to be true
+          expect(argument_subject.matches?(worker)).to be true
         end
       end
 
       context 'when expected are matchers' do
         it 'returns true' do
           worker.perform_async *worker_args
-          expect(matcher_subject.matches? worker).to be true
+          expect(matcher_subject.matches?(worker)).to be true
         end
       end
 
@@ -156,13 +170,13 @@ RSpec.describe RSpec::Sidekiq::Matchers::HaveEnqueuedJob do
 
           context 'and timestamp matches' do
             it 'returns true' do
-              expect(matcher_subject.at(tomorrow).matches? worker).to be true
+              expect(matcher_subject.at(tomorrow).matches?(worker)).to be true
             end
           end
 
           context 'and timestamp does not match' do
             it 'returns false' do
-              expect(matcher_subject.at(tomorrow + 1).matches? worker).to be false
+              expect(matcher_subject.at(tomorrow + 1).matches?(worker)).to be false
             end
           end
         end
@@ -174,13 +188,34 @@ RSpec.describe RSpec::Sidekiq::Matchers::HaveEnqueuedJob do
 
           context 'and interval matches' do
             it 'returns true' do
-              expect(matcher_subject.in(interval).matches? worker).to be true
+              expect(matcher_subject.in(interval).matches?(worker)).to be true
             end
           end
 
           context 'and interval does not match' do
             it 'returns false' do
-              expect(matcher_subject.in(interval + 1.minute).matches? worker).to be false
+              expect(matcher_subject.in(interval + 1.minute).matches?(worker)).to be false
+            end
+          end
+        end
+
+        context 'setting queue at enqueue time' do
+          before(:each) do
+            worker.set(queue: queue).perform_async(*worker_args)
+          end
+
+          let(:queue) { :queue }
+          let(:another) { :another }
+
+          context 'and queue matches' do
+            it 'returns true' do
+              expect(matcher_subject.to(queue).matches?(worker)).to be true
+            end
+          end
+
+          context 'and queue does not match' do
+            it 'returns false' do
+              expect(matcher_subject.to(another).matches?(worker)).to be true
             end
           end
         end
@@ -192,13 +227,13 @@ RSpec.describe RSpec::Sidekiq::Matchers::HaveEnqueuedJob do
 
       context 'when expected are arguments' do
         it 'returns false' do
-          expect(argument_subject.matches? worker).to be false
+          expect(argument_subject.matches?(worker)).to be false
         end
       end
 
       context 'when expected are matchers' do
         it 'returns false' do
-          expect(matcher_subject.matches? worker).to be false
+          expect(matcher_subject.matches?(worker)).to be false
         end
       end
 
@@ -209,7 +244,7 @@ RSpec.describe RSpec::Sidekiq::Matchers::HaveEnqueuedJob do
           end
 
           it 'returns false' do
-            expect(matcher_subject.at(tomorrow).matches? worker).to be false
+            expect(matcher_subject.at(tomorrow).matches?(worker)).to be false
           end
         end
 
@@ -219,7 +254,7 @@ RSpec.describe RSpec::Sidekiq::Matchers::HaveEnqueuedJob do
           end
 
           it 'returns false' do
-            expect(matcher_subject.in(interval).matches? worker).to be false
+            expect(matcher_subject.in(interval).matches?(worker)).to be false
           end
         end
       end

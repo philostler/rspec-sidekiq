@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RSpec
   module Sidekiq
     module Matchers
@@ -6,7 +8,7 @@ module RSpec
       end
 
       def have_enqueued_job(*expected_arguments)
-        warn "[DEPRECATION] `have_enqueued_job` is deprecated.  Please use `have_enqueued_sidekiq_job` instead."
+        warn '[DEPRECATION] `have_enqueued_job` is deprecated.  Please use `have_enqueued_sidekiq_job` instead.'
         have_enqueued_sidekiq_job(*expected_arguments)
       end
 
@@ -18,7 +20,8 @@ module RSpec
         end
 
         def matches?(option, value)
-          raise ArgumentError, "Option `#{option}` is not defined." unless %w(in at).include?(option.to_s)
+          raise ArgumentError, "Option `#{option}` is not defined." unless %w[in at queue].include?(option.to_s)
+
           send("#{option}_evaluator", value)
         end
 
@@ -26,12 +29,18 @@ module RSpec
 
         def at_evaluator(value)
           return false if job['at'].to_s.empty?
+
           value.to_time.to_s == Time.at(job['at']).to_s
         end
 
         def in_evaluator(value)
           return false if job['at'].to_s.empty?
+
           (Time.now + value).to_s == Time.at(job['at']).to_s
+        end
+
+        def queue_evaluator(value)
+          value == job['queue']
         end
       end
 
@@ -71,12 +80,14 @@ module RSpec
 
         def job_arguments(job)
           args = job['args']
-          return args[0]['arguments'] if args.is_a?(Array) && args[0].is_a?(Hash) && args[0].has_key?('arguments')
+          return args[0]['arguments'] if args.is_a?(Array) && args[0].is_a?(Hash) && args[0].key?('arguments')
+
           args
         end
 
         def unwrap_jobs(jobs)
           return jobs if jobs.is_a?(Array)
+
           jobs.values.flatten
         end
 
@@ -111,6 +122,12 @@ module RSpec
           self
         end
 
+        def to(queue)
+          @expected_options['queue'] = queue
+
+          self
+        end
+
         def description
           "have an enqueued #{klass} job with arguments #{expected_arguments}"
         end
@@ -119,7 +136,7 @@ module RSpec
           message = ["expected to have an enqueued #{klass} job"]
           message << "  arguments: #{expected_arguments}" if expected_arguments
           message << "  options: #{expected_options}" if expected_options.any?
-          message << "found"
+          message << 'found'
           message << "  arguments: #{actual_arguments}" if expected_arguments
           message << "  options: #{actual_options}" if expected_options.any?
           message.join("\n")
@@ -137,7 +154,7 @@ module RSpec
         def unwrapped_job_options(jobs)
           jobs = jobs.values if jobs.is_a?(Hash)
           jobs.flatten.map do |job|
-            { 'at' => job['at'] }
+            { 'at' => job['at'], 'queue' => job['queue'] }
           end
         end
 
@@ -148,7 +165,7 @@ module RSpec
             end
           else
             map_arguments(jobs)
-          end.map { |job| job.flatten }
+          end.map(&:flatten)
         end
 
         def map_arguments(job)
@@ -166,7 +183,7 @@ module RSpec
 
         def normalize_arguments(args)
           if args.is_a?(Array)
-            args.map{ |x| normalize_arguments(x) }
+            args.map { |x| normalize_arguments(x) }
           elsif args.is_a?(Hash)
             args.each_with_object({}) do |(key, value), hash|
               hash[key.to_s] = normalize_arguments(value)
