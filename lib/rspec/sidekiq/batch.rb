@@ -75,9 +75,14 @@ if defined? Sidekiq::Batch
 
       if mocked_with_mocha?
         Sidekiq::Batch.stubs(:new) { RSpec::Sidekiq::NullBatch.new }
-      else
+      elsif respond_to?(:allow)
         allow(Sidekiq::Batch).to receive(:new)  { RSpec::Sidekiq::NullBatch.new }
         allow(Sidekiq::Batch::Status).to receive(:new)  { RSpec::Sidekiq::NullStatus.new }
+      elsif respond_to?(:flexmock)
+        flexmock(Sidekiq::Batch).should_receive(:new).and_return(RSpec::Sidekiq::NullBatch.new)
+        flexmock(Sidekiq::Batch::Status).should_receive(:new).and_return(RSpec::Sidekiq::NullStatus.new)
+      else
+        raise "No mocking library detected. Only rspec-mocks, flexmock and mocha are supported"
       end
     end
   end
