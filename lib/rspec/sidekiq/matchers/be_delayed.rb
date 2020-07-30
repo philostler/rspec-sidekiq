@@ -59,7 +59,8 @@ module RSpec
         def find_job(method, arguments, &block)
           job = (::Sidekiq::Extensions::DelayedClass.jobs + ::Sidekiq::Extensions::DelayedModel.jobs + ::Sidekiq::Extensions::DelayedMailer.jobs).find do |job|
             yaml = YAML.load(job['args'].first)
-            @expected_method_receiver == yaml[0] && @expected_method.name == yaml[1] && (@expected_arguments <=> yaml[2]) == 0
+            matcher = ::RSpec::Mocks::ArgumentListMatcher.new(*@expected_arguments)
+            @expected_method_receiver == yaml[0] && @expected_method.name == yaml[1] && matcher.args_match?(*yaml[2])
           end
 
           yield job if block && job

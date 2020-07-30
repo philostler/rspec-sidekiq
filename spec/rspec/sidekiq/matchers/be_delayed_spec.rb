@@ -3,6 +3,7 @@ require 'spec_helper'
 RSpec.describe RSpec::Sidekiq::Matchers::BeDelayed do
   let(:delay_subject) { RSpec::Sidekiq::Matchers::BeDelayed.new }
   let(:delay_with_arguments_subject) { RSpec::Sidekiq::Matchers::BeDelayed.new Object }
+  let(:delay_with_matching_arguments_subject) { RSpec::Sidekiq::Matchers::BeDelayed.new Object, any_args }
   let(:delay_for_subject) { RSpec::Sidekiq::Matchers::BeDelayed.new.for 3600 }
   let(:delay_for_with_arguments_subject) { RSpec::Sidekiq::Matchers::BeDelayed.new(Object).for 3600 }
   let(:delay_until_subject) { RSpec::Sidekiq::Matchers::BeDelayed.new.until Time.now + 3600 }
@@ -123,6 +124,14 @@ RSpec.describe RSpec::Sidekiq::Matchers::BeDelayed do
           Object.delay.is_a? Object
 
           expect(delay_with_arguments_subject.matches? Object.method :is_a?).to be true
+        end
+      end
+
+      context 'when expected is a delay with matching arguments' do
+        it 'returns true' do
+          Object.delay.is_a? Object
+
+          expect(delay_with_matching_arguments_subject.matches? Object.method :is_a?).to be true
         end
       end
 
