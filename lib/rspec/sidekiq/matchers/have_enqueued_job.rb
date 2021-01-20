@@ -11,6 +11,8 @@ module RSpec
       end
 
       class JobOptionParser
+        DELTA = 1
+
         attr_reader :job
 
         def initialize(job)
@@ -26,12 +28,12 @@ module RSpec
 
         def at_evaluator(value)
           return false if job['at'].to_s.empty?
-          value.to_time.to_i == Time.at(job['at']).to_i
+          (value.to_time.to_f - Time.at(job['at']).to_f).abs < DELTA
         end
 
         def in_evaluator(value)
           return false if job['at'].to_s.empty?
-          (Time.now + value).to_i == Time.at(job['at']).to_i
+          ((Time.now + value).to_f - Time.at(job['at']).to_f).abs < DELTA
         end
       end
 
