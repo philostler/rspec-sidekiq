@@ -28,7 +28,7 @@ RSpec.describe RSpec::Sidekiq::Matchers::BeDelayed do
 
   describe '#be_delayed_job' do
     it 'returns instance' do
-      expect(be_delayed).to be_a RSpec::Sidekiq::Matchers::BeDelayed
+      expect(be_delayed).to be_a described_class
     end
   end
 

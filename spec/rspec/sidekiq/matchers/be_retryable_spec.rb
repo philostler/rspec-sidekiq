@@ -21,7 +21,7 @@ RSpec.describe RSpec::Sidekiq::Matchers::BeRetryable do
 
   describe '#be_retryable' do
     it 'returns instance' do
-      expect(be_retryable true).to be_a RSpec::Sidekiq::Matchers::BeRetryable
+      expect(be_retryable true).to be_a described_class
     end
   end
 

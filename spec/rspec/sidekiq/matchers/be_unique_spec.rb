@@ -71,7 +71,7 @@ RSpec.describe RSpec::Sidekiq::Matchers::BeUnique do
     end
 
     it 'returns instance' do
-      expect(be_unique).to be_kind_of RSpec::Sidekiq::Matchers::BeUnique::Base
+      expect(be_unique).to be_kind_of described_class::Base
     end
   end
 

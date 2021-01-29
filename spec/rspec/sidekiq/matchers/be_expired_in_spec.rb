@@ -6,7 +6,7 @@ RSpec.describe RSpec::Sidekiq::Matchers::BeExpiredIn do
 
   describe '#be_expired_in' do
     it 'returns instance' do
-      expect(be_expired_in 1).to be_a RSpec::Sidekiq::Matchers::BeExpiredIn
+      expect(be_expired_in 1).to be_a described_class
     end
   end
 
@@ -37,7 +37,7 @@ RSpec.describe RSpec::Sidekiq::Matchers::BeExpiredIn do
     end
     context 'when expected is not equal to actual' do
       it 'returns false' do
-        expect(RSpec::Sidekiq::Matchers::BeExpiredIn.new(2).matches? worker). to be false
+        expect(described_class.new(2).matches? worker). to be false
       end
     end
   end

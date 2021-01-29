@@ -1,6 +1,7 @@
 require 'simplecov'
 require 'coveralls'
 
+require 'rspec'
 require 'sidekiq'
 require 'rspec-sidekiq'
 
