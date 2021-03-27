@@ -108,7 +108,7 @@ sidekiq_options backtrace: 5
 # test with...
 expect(AwesomeJob).to save_backtrace # or
 it { is_expected.to save_backtrace }
-# ...or alternatively specifiy the number of lines that should be saved
+# ...or alternatively specify the number of lines that should be saved
 expect(AwesomeJob).to save_backtrace 5 # or
 it { is_expected.to save_backtrace 5 }
 # ...or when it should not save the backtrace
