@@ -147,9 +147,6 @@ AwesomeJob.perform_async 'Awesome', true
 # test with...
 expect(AwesomeJob).to have_enqueued_sidekiq_job('Awesome', true)
 
-# Code written with older versions of the gem may use the deprecated
-# have_enqueued_job matcher.
-expect(AwesomeJob).to have_enqueued_job('Awesome', true)
 ```
 
 #### Testing scheduled jobs
