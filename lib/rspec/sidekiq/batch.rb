@@ -49,7 +49,7 @@ if defined? Sidekiq::Batch
           @callbacks.each do |event, callback, options|
             if event != :success || failures == 0
               case callback
-              when Class    
+              when Class
                 callback.new.send("on_#{event}", self, options)
               when String
                 klass, meth = callback.split('#')
@@ -73,8 +73,11 @@ if defined? Sidekiq::Batch
     config.before(:each) do |example|
       next if example.metadata[:stub_batches] == false
 
-      if mocked_with_mocha?
+      if mocked_with.to_sym == :mocha
         Sidekiq::Batch.stubs(:new) { RSpec::Sidekiq::NullBatch.new }
+      elsif mocked_with.to_sym == :rr
+        stub(Sidekiq::Batch).new { RSpec::Sidekiq::NullBatch.new }
+        stub(Sidekiq::Batch::Status).new { RSpec::Sidekiq::NullBatch.new }
       else
         allow(Sidekiq::Batch).to receive(:new)  { RSpec::Sidekiq::NullBatch.new }
         allow(Sidekiq::Batch::Status).to receive(:new)  { RSpec::Sidekiq::NullStatus.new }
@@ -85,6 +88,13 @@ if defined? Sidekiq::Batch
   ## Helpers ----------------------------------------------
   def mocked_with_mocha?
     Sidekiq::Batch.respond_to? :stubs
+  end
+
+  def mocked_with
+    mock_framework = RSpec.configuration.mock_framework
+    return mock_framework.framework_name if mock_framework.respond_to? :framework_name
+    puts('WARNING: Could not detect mocking framework')
+    :rspec
   end
   # :nocov:
 end
